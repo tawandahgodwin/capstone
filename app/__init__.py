@@ -1,25 +1,27 @@
+import serial
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
-import serial
-
-from .models import Attendance
 
 
 app = Flask(__name__)
-
-db = SQLAlchemy(app)
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
 
 
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
+from app import models
+
+# Listen for RFID reader signals and write to the database
 ser=serial.Serial('COM1',9600)
 readedText = ser.readline()
 print(readedText)
 ser.close()
 
 
+# Endpoint for viewing attendance list
 @app.route('/attendance_list')
 def attendance_list():
     attendance_list = Attendance.query.all()
